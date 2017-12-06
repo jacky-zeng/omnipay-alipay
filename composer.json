@@ -1,0 +1,26 @@
+{
+  "name": "jacky-zeng/omnipay-alipay",
+  "type": "library",
+  "description": "完善omnipay-alipay库 新增无密退款及详细代码示例说明",
+  "authors": [
+    {
+      "name": "jacky-zeng",
+      "email": "1017798347@qq.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Omnipay\\Alipay\\": "src/",
+      "Omnipay\\Alipay\\Tests\\": "tests/"
+    },
+    "files": [
+      "src/Common/helpers.php"
+    ]
+  },
+  "require": {
+    "omnipay/common": "~2.0"
+  },
+  "require-dev": {
+    "omnipay/tests": "~2.0"
+  }
+}
