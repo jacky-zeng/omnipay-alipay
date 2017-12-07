@@ -3,6 +3,7 @@
 namespace Omnipay\Alipay;
 
 use Omnipay\Alipay\Requests\LegacyExpressPurchaseRequest;
+use Omnipay\Alipay\Requests\LegacyRefundNoPwdRequest;
 
 /**
  * Class LegacyExpressGateway
@@ -32,4 +33,10 @@ class LegacyExpressGateway extends AbstractLegacyGateway
     {
         return $this->createRequest(LegacyExpressPurchaseRequest::class, $parameters);
     }
+
+    public function refundNoPwd(array $parameters = [])
+    {
+        return $this->createRequest(LegacyRefundNoPwdRequest::class, $parameters);
+    }
+
 }

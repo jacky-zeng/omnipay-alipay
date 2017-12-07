@@ -11,10 +11,10 @@ use Omnipay\Common\Message\ResponseInterface;
  * @package Omnipay\Alipay\Requests
  * @link    https://doc.open.alipay.com/docs/doc.htm?treeId=66&articleId=103600&docType=1
  */
-class LegacyRefundRequest extends AbstractLegacyRequest
+class LegacyRefundNoPwdRequest extends AbstractLegacyRequest
 {
 
-    protected $service = 'refund_fastpay_by_platform_pwd';
+    protected $service = 'refund_fastpay_by_platform_nopwd';
 
 
     /**
