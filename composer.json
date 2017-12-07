@@ -2,6 +2,7 @@
   "name": "jacky-zeng/omnipay-alipay",
   "type": "library",
   "description": "完善omnipay-alipay库 新增无密退款及详细代码示例说明",
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "jacky-zeng",
