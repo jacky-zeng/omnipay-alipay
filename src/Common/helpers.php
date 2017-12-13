@@ -9,6 +9,7 @@
  *
  * @return mixed
  */
+/*
 if (! function_exists('array_get')) {
     function array_get($array, $key, $default = null)
     {
@@ -31,6 +32,7 @@ if (! function_exists('array_get')) {
         return $array;
     }
 }
+*/
 
 if (! function_exists('array_has')) {
     function array_has($array, $key)
