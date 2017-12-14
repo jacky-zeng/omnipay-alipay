@@ -7,7 +7,7 @@
 Omnipay is installed via [Composer](http://getcomposer.org/). To install, simply add it
 to your `composer.json` file:
 
-    "jacky-zeng/omnipay-alipay": "^1.0",
+    "jacky-zeng/omnipay-alipay": "1.2",
 
 And run composer to update your dependencies:
 
@@ -31,12 +31,11 @@ The following gateways are provided by this package:
 
 ### Purchase (购买)
 
-```php
+```
     protected function baseOption($gateway)
     {
         $publicKey = config('config.AliPay.alipay_public_key');  //获取支付宝公钥
         $privateKey = config('config.AliPay.merchant_private_key');  //获取支付宝私钥
-        //$gateway->setEnvironment('sandbox');
         $gateway->setSignType('RSA2'); // RSA/RSA2/MD5
         $gateway->setAppId(config('config.AliPay.app_id'));
         $gateway->setPrivateKey($privateKey);
@@ -44,7 +43,7 @@ The following gateways are provided by this package:
         return $gateway;
     }
 
-    // alipay - h5/app
+    // alipay - h5
     public function aliPay(Request $request)
     {
         $order_number = array_get($request->all(), 'order_number', date('YmdHis') . mt_rand(1000, 9999));
@@ -57,7 +56,7 @@ The following gateways are provided by this package:
         $response = $gateway->purchase()->setBizContent([
             'out_trade_no' => $order_number,
             'total_amount' => $total_amount / 100,
-            'subject'      => '外卖支付宝支付测试',
+            'subject'      => '支付宝支付测试',
             'product_code' => 'FAST_INSTANT_TRADE_PAY',
         ])->send();
         $redirectUrl = $response->getRedirectUrl();
@@ -158,44 +157,57 @@ repository.
     }
     
 ```
-## Refund Query （退款查询）
+## Pay Notify （支付回调）
+```
+    /**
+     * 支付宝支付回调(同步/异步) 验签  并返回回调数据
+     * @param $params
+     * @return bool|mixed
+     */
+    private function verifyAndGetAliDataForPay($params)
+    {
+        $gateway = Omnipay::create('Alipay_AopApp');
+        $publicKey = config('config.AliPay.alipay_public_key');  //获取支付宝公钥
+        $privateKey = config('config.AliPay.merchant_private_key');  //获取支付宝私钥
+        $gateway->setSignType(config('config.AliPay.sign_type')); // RSA/RSA2/MD5
+        $gateway->setAppId(config('config.AliPay.app_id'));
+        $gateway->setPrivateKey($privateKey);
+        $gateway->setAlipayPublicKey($publicKey);
+        try {
+            $response = $gateway->completePurchase(['params' => $params])->send(); //验签
+            $data = $response->getData();
+            return $data;
+        } catch (InvalidRequestException $ex) {
+            \Log::info('支付宝支付回调失败:' . $ex->getMessage());
+            return false;
+        }
+    }
+```
+
+## Refund Notify （退款回调）
 ```
    /**
-    * 支付宝退款查询
-    * @param Request $request
-    * @return mixed
-    */
-   public function aliQueryRefund(Request $request)
-   {
-       $params = $request->all();
-       $out_trade_no = array_get($params, 'out_trade_no');
-       $out_request_no = array_get($params, 'out_request_no');
-       $gateway = Omnipay::create('Alipay_AopPage');
-       $gateway = $this->baseOption($gateway);
-       $data = [
-           'biz_content' => [
-                   'trade_no' => $out_trade_no,
-                   'out_request_no' => $out_request_no
-               ]
-       ];
-       $request = $gateway->refundQuery($data);
-       $response = $request->send();
-       $rs = $response->getData();
-       if($rs && is_array($rs)){
-           if(array_get($rs, 'alipay_trade_fastpay_refund_query_response.code') == '10000'){
-               return ['msg' => '退款已完成'];
-           }else{
-               return [
-                   'msg' => array_get($rs, 'alipay_trade_fastpay_refund_query_response.msg')
-                       . ' '
-                       . array_get($rs, 'alipay_trade_fastpay_refund_query_response.sub_msg')
-               ];
-           }
-       }else{
-           return '调用失败 '. array_get($rs, 'error');
-       }
-   }
+     * 支付宝退款回调异步 验签 并返回回调数据
+     * @param $params
+     * @return bool|mixed
+     */
+    private function verifyAndGetAliDataForRefund($params)
+    {
+        $gateway = Omnipay::create('Alipay_LegacyExpress');
+        $gateway->setSignType(config('config.AliWebPay.sign_type')); // MD5
+        $gateway->setPartner(config('config.AliWebPay.partner'));
+        $gateway->setKey(config('config.AliWebPay.key'));
+        try {
+            $response = $gateway->completePurchase(['params' => $params])->send(); //验签
+            $data = $response->getData();
+            return $data;
+        } catch (InvalidRequestException $ex) {
+            \Log::info('支付宝退款回调失败:' . $ex->getMessage());
+            return false;
+        }
+    }
 ```
+
 ## Related
 
 - [Laravel-Omnipay](https://github.com/ignited/laravel-omnipay)
